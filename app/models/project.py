@@ -4,6 +4,8 @@ from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
+from app.models.document import Document
+from app.models.project_access import ProjectAccess
 
 
 class Project(Base, TimestampMixin):
@@ -20,12 +22,12 @@ class Project(Base, TimestampMixin):
     logo_thumbnail_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     # Relationships
-    documents: Mapped[list["Document"]] = relationship(  # noqa: F821
+    documents: Mapped[list["Document"]] = relationship(
         "Document",
         back_populates="project",
         cascade="all, delete-orphan",
     )
-    accesses: Mapped[list["ProjectAccess"]] = relationship(  # noqa: F821
+    accesses: Mapped[list["ProjectAccess"]] = relationship(
         "ProjectAccess",
         back_populates="project",
         cascade="all, delete-orphan",

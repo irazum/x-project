@@ -41,7 +41,7 @@ dev = [
 # Using py312 as ruff doesn't support py314 yet (as of v0.15.4)
 target-version = "py312"
 line-length = 100
-select = [
+lint.select = [
     "E",      # pycodestyle errors
     "W",      # pycodestyle warnings
     "F",      # pyflakes
@@ -52,13 +52,13 @@ select = [
     "ARG",    # flake8-unused-arguments
     "SIM",    # flake8-simplify
 ]
-ignore = [
+lint.ignore = [
     "E501",   # line too long (handled by formatter)
     "B008",   # do not perform function calls in argument defaults
     "B904",   # raise without from inside except
 ]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["app"]
 
 [tool.mypy]
