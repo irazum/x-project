@@ -225,8 +225,13 @@ tests/
 | `another_user` | Secondary user for access control tests |
 
 > **Note:** Each integration test runs with a clean database state — tables are created before and dropped after each test function.
-> 
 > **Unit tests** run without any external dependencies (database, S3, etc.) and use mocks for all external services.
+
+## Pre-commit hooks
+Install pre-commit hooks to use linter, formatter, and type checker automatically
+```bash
+pre-commit install
+```
 
 ## Linting & Formatting
 
