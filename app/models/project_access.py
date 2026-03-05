@@ -54,9 +54,7 @@ class ProjectAccess(Base, TimestampMixin):
     )
 
     # Ensure a user can only have one access record per project
-    __table_args__ = (
-        UniqueConstraint("user_id", "project_id", name="uq_user_project_access"),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "project_id", name="uq_user_project_access"),)
 
     @property
     def is_owner(self) -> bool:

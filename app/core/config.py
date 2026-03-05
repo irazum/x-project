@@ -53,8 +53,7 @@ class Settings(BaseSettings):
     # File Upload
     max_upload_size_mb: int = 50
     allowed_document_types: str = (
-        "application/pdf,"
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        "application/pdf," "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
     allowed_image_types: str = "image/jpeg,image/png,image/gif,image/webp"
 

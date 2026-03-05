@@ -307,9 +307,7 @@ class StorageService:
             }
 
             if download_filename:
-                params["ResponseContentDisposition"] = (
-                    f'attachment; filename="{download_filename}"'
-                )
+                params["ResponseContentDisposition"] = f'attachment; filename="{download_filename}"'
 
             return self.client.generate_presigned_url(
                 "get_object",

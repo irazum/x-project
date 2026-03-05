@@ -40,9 +40,7 @@ class BaseRepository(Generic[ModelType]):
         Returns:
             The record if found, None otherwise
         """
-        result = await self.session.execute(
-            select(self.model).where(self.model.id == id)
-        )
+        result = await self.session.execute(select(self.model).where(self.model.id == id))
         return result.scalar_one_or_none()
 
     async def get_by_ids(self, ids: list[int]) -> list[ModelType]:
@@ -57,9 +55,7 @@ class BaseRepository(Generic[ModelType]):
         """
         if not ids:
             return []
-        result = await self.session.execute(
-            select(self.model).where(self.model.id.in_(ids))
-        )
+        result = await self.session.execute(select(self.model).where(self.model.id.in_(ids)))
         return list(result.scalars().all())
 
     async def get_all(
@@ -77,9 +73,7 @@ class BaseRepository(Generic[ModelType]):
         Returns:
             List of records
         """
-        result = await self.session.execute(
-            select(self.model).offset(skip).limit(limit)
-        )
+        result = await self.session.execute(select(self.model).offset(skip).limit(limit))
         return list(result.scalars().all())
 
     async def create(self, **kwargs: Any) -> ModelType:
@@ -116,9 +110,7 @@ class BaseRepository(Generic[ModelType]):
             return await self.get(id)
 
         await self.session.execute(
-            update(self.model)
-            .where(self.model.id == id)
-            .values(**update_data)
+            update(self.model).where(self.model.id == id).values(**update_data)
         )
         await self.session.flush()
         return await self.get(id)
@@ -133,9 +125,7 @@ class BaseRepository(Generic[ModelType]):
         Returns:
             True if deleted, False if not found
         """
-        result = await self.session.execute(
-            delete(self.model).where(self.model.id == id)
-        )
+        result = await self.session.execute(delete(self.model).where(self.model.id == id))
         await self.session.flush()
         return result.rowcount > 0
 
@@ -149,7 +139,5 @@ class BaseRepository(Generic[ModelType]):
         Returns:
             True if exists, False otherwise
         """
-        result = await self.session.execute(
-            select(self.model.id).where(self.model.id == id)
-        )
+        result = await self.session.execute(select(self.model.id).where(self.model.id == id))
         return result.scalar_one_or_none() is not None

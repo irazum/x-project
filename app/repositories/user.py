@@ -24,9 +24,7 @@ class UserRepository(BaseRepository[User]):
         Returns:
             The user if found, None otherwise
         """
-        result = await self.session.execute(
-            select(User).where(User.login == login.lower())
-        )
+        result = await self.session.execute(select(User).where(User.login == login.lower()))
         return result.scalar_one_or_none()
 
     async def get_by_email(self, email: str) -> User | None:
@@ -39,9 +37,7 @@ class UserRepository(BaseRepository[User]):
         Returns:
             The user if found, None otherwise
         """
-        result = await self.session.execute(
-            select(User).where(User.email == email.lower())
-        )
+        result = await self.session.execute(select(User).where(User.email == email.lower()))
         return result.scalar_one_or_none()
 
     async def login_exists(self, login: str) -> bool:
@@ -54,9 +50,7 @@ class UserRepository(BaseRepository[User]):
         Returns:
             True if exists, False otherwise
         """
-        result = await self.session.execute(
-            select(User.id).where(User.login == login.lower())
-        )
+        result = await self.session.execute(select(User.id).where(User.login == login.lower()))
         return result.scalar_one_or_none() is not None
 
     async def email_exists(self, email: str) -> bool:
@@ -69,9 +63,7 @@ class UserRepository(BaseRepository[User]):
         Returns:
             True if exists, False otherwise
         """
-        result = await self.session.execute(
-            select(User.id).where(User.email == email.lower())
-        )
+        result = await self.session.execute(select(User.id).where(User.email == email.lower()))
         return result.scalar_one_or_none() is not None
 
     async def create_user(

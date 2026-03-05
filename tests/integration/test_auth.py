@@ -42,9 +42,7 @@ class TestRegister:
         assert response.status_code == 422
 
     @pytest.mark.asyncio
-    async def test_register_duplicate_login(
-        self, client: AsyncClient, test_user
-    ) -> None:
+    async def test_register_duplicate_login(self, client: AsyncClient, test_user) -> None:
         """Test registration with existing login."""
         response = await client.post(
             "/api/v1/auth/register",
@@ -93,9 +91,7 @@ class TestLogin:
         assert "expires_in" in data
 
     @pytest.mark.asyncio
-    async def test_login_invalid_password(
-        self, client: AsyncClient, test_user
-    ) -> None:
+    async def test_login_invalid_password(self, client: AsyncClient, test_user) -> None:
         """Test login with wrong password."""
         response = await client.post(
             "/api/v1/auth/login",

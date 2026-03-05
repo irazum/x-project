@@ -27,7 +27,7 @@ class ProjectRepository(BaseRepository[Project]):
             The project with documents if found, None otherwise
         """
         result = await self.session.execute(
-            select(Project)
+            select(Project)  # build query
             .options(selectinload(Project.documents))
             .where(Project.id == project_id)
         )

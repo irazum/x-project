@@ -6,6 +6,7 @@ from unittest.mock import patch
 import pytest
 from jose import jwt
 
+from app.core.exceptions import InvalidTokenError
 from app.core.security import (
     create_access_token,
     create_share_token,
@@ -13,7 +14,6 @@ from app.core.security import (
     get_password_hash,
     verify_password,
 )
-from app.core.exceptions import InvalidTokenError
 
 
 class TestPasswordHashing:

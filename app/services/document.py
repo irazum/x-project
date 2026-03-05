@@ -1,7 +1,6 @@
 """Document service."""
 
 import io
-from typing import BinaryIO
 
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -390,9 +389,9 @@ class LogoService:
 
         # Delete existing logo if present
         if project.logo_key or project.logo_thumbnail_key:
-            await storage_service.delete_files([
-                k for k in [project.logo_key, project.logo_thumbnail_key] if k
-            ])
+            await storage_service.delete_files(
+                [k for k in [project.logo_key, project.logo_thumbnail_key] if k]
+            )
 
         # Read file content
         content = await file.read()
@@ -438,9 +437,9 @@ class LogoService:
 
         # Delete from S3 if exists
         if project.logo_key or project.logo_thumbnail_key:
-            await storage_service.delete_files([
-                k for k in [project.logo_key, project.logo_thumbnail_key] if k
-            ])
+            await storage_service.delete_files(
+                [k for k in [project.logo_key, project.logo_thumbnail_key] if k]
+            )
 
         # Update database
         await self.project_repo.update_logo(

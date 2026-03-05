@@ -1,10 +1,7 @@
 """Pytest configuration and fixtures."""
 
-import asyncio
-from collections.abc import AsyncGenerator, Generator
-from typing import Any
+from collections.abc import AsyncGenerator
 
-import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -18,9 +15,7 @@ from app.models import Project, ProjectAccess, User
 from app.models.project_access import AccessRole
 
 # Test database URL (use a separate test database)
-TEST_DATABASE_URL = settings.database_url.replace(
-    "/project_management", "/test_project_management"
-)
+TEST_DATABASE_URL = settings.database_url.replace("/project_management", "/test_project_management")
 
 
 @pytest_asyncio.fixture(scope="function")

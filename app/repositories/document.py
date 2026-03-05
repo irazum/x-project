@@ -32,7 +32,7 @@ class DocumentRepository(BaseRepository[Document]):
             List of documents
         """
         result = await self.session.execute(
-            select(Document)
+            select(Document)  # build query
             .where(Document.project_id == project_id)
             .offset(skip)
             .limit(limit)

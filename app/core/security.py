@@ -1,6 +1,6 @@
 """Security utilities - JWT tokens and password hashing."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from jose import JWTError, jwt
@@ -40,16 +40,14 @@ def create_access_token(
         Encoded JWT token string
     """
     if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
+        expire = datetime.now(UTC) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(
-            minutes=settings.jwt_access_token_expire_minutes
-        )
+        expire = datetime.now(UTC) + timedelta(minutes=settings.jwt_access_token_expire_minutes)
 
     to_encode: dict[str, Any] = {
         "sub": str(subject),
         "exp": expire,
-        "iat": datetime.now(timezone.utc),
+        "iat": datetime.now(UTC),
         "type": "access",
     }
 
@@ -103,12 +101,12 @@ def create_share_token(project_id: int, expires_hours: int = 72) -> str:
     Returns:
         Encoded share token string
     """
-    expire = datetime.now(timezone.utc) + timedelta(hours=expires_hours)
+    expire = datetime.now(UTC) + timedelta(hours=expires_hours)
 
     to_encode = {
         "project_id": project_id,
         "exp": expire,
-        "iat": datetime.now(timezone.utc),
+        "iat": datetime.now(UTC),
         "type": "share",
     }
 

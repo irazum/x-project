@@ -12,9 +12,7 @@ class TestCreateProject:
     """Tests for project creation."""
 
     @pytest.mark.asyncio
-    async def test_create_project_success(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_create_project_success(self, client: AsyncClient, auth_headers: dict) -> None:
         """Test successful project creation."""
         response = await client.post(
             "/api/v1/projects",
@@ -63,9 +61,7 @@ class TestGetProjects:
     """Tests for listing projects."""
 
     @pytest.mark.asyncio
-    async def test_get_projects_empty(
-        self, client: AsyncClient, auth_headers: dict
-    ) -> None:
+    async def test_get_projects_empty(self, client: AsyncClient, auth_headers: dict) -> None:
         """Test getting projects when user has none."""
         response = await client.get("/api/v1/projects", headers=auth_headers)
 
