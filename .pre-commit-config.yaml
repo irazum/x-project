@@ -1,5 +1,5 @@
 # Pre-commit hooks configuration
-exclude: ^(tests/|alembic/)
+exclude: ^(tests/|alembic/|scripts/)
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks

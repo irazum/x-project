@@ -4,7 +4,6 @@ from sqlalchemy import BigInteger, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
-from app.models.project import Project
 
 
 class Document(Base, TimestampMixin):
@@ -29,7 +28,7 @@ class Document(Base, TimestampMixin):
     storage_key: Mapped[str] = mapped_column(String(500), nullable=False)
 
     # Relationships
-    project: Mapped["Project"] = relationship(  # noqa: F821
+    project: Mapped["Project"] = relationship(  # noqa: F821 (can not import Project due to circular import)
         "Project",
         back_populates="documents",
     )

@@ -96,7 +96,7 @@ A FastAPI-based project management dashboard API with PostgreSQL, SQLAlchemy, an
    uv run uvicorn app.main:app --reload
    ```
 
-### Using Docker
+### Using Docker (Development)
 
 ```bash
 # Start all services
@@ -111,6 +111,30 @@ docker-compose exec api alembic upgrade head
 # View logs
 docker-compose logs -f api
 ```
+
+### Production Deployment
+
+```bash
+# 1. Create production env file from template
+cp .env.production.example .env.production
+# Edit .env.production with real credentials
+
+# 2. Start services
+docker-compose -f docker-compose.prod.yml up -d
+
+# 3. Run migrations (one-time)
+docker-compose -f docker-compose.prod.yml --profile migration up migrate
+
+# 4. View logs
+docker-compose -f docker-compose.prod.yml logs -f api
+```
+
+Key differences from development:
+- No hardcoded secrets — all credentials loaded from `.env.production`
+- PostgreSQL requires password for all connections (custom `pg_hba.conf`)
+- DB port not exposed to host — only reachable via internal Docker network
+- No source code volume mounts — uses the built image
+- No LocalStack — uses real AWS S3
 
 ## API Documentation
 
@@ -250,7 +274,7 @@ mypy app
 
 ```bash
 # Create new migration
-alembic revision --autogenerate -m "description"
+alembic revision --autogenerate -m "<description>"
 
 # Apply migrations
 alembic upgrade head
