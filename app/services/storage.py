@@ -5,6 +5,7 @@ import uuid
 from typing import BinaryIO
 
 import boto3
+from botocore.client import BaseClient
 from botocore.exceptions import ClientError
 from PIL import Image
 
@@ -17,10 +18,10 @@ class StorageService:
 
     def __init__(self) -> None:
         """Initialize S3 client."""
-        self._client = None
+        self._client: BaseClient | None = None
 
     @property
-    def client(self):
+    def client(self) -> BaseClient:
         """Get or create S3 client."""
         if self._client is None:
             self._client = boto3.client(
@@ -44,7 +45,6 @@ class StorageService:
             Unique S3 key
         """
         unique_id = uuid.uuid4().hex[:8]
-        extension = filename.rsplit(".", 1)[-1] if "." in filename else ""
         safe_filename = f"{unique_id}_{filename}"
         return f"{prefix}/{safe_filename}"
 
@@ -309,11 +309,12 @@ class StorageService:
             if download_filename:
                 params["ResponseContentDisposition"] = f'attachment; filename="{download_filename}"'
 
-            return self.client.generate_presigned_url(
+            url: str = self.client.generate_presigned_url(
                 "get_object",
                 Params=params,
                 ExpiresIn=expiration,
             )
+            return url
         except ClientError as e:
             raise StorageError(f"Failed to generate presigned URL: {e}") from e
 

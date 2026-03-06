@@ -239,6 +239,10 @@ class DocumentService:
             storage_key=storage_key,
         )
 
+        if not updated:
+            # Race condition: document was deleted between get and update
+            raise NotFoundError("Document was deleted during update", document_id)
+
         return DocumentResponse(
             id=updated.id,
             filename=updated.filename,

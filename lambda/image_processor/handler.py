@@ -9,6 +9,7 @@ Deploy this function with appropriate IAM permissions for S3 access.
 import io
 import json
 import urllib.parse
+from typing import Any
 
 import boto3
 from PIL import Image
@@ -21,13 +22,13 @@ THUMBNAIL_SIZE = 200
 s3_client = boto3.client("s3")
 
 
-def lambda_handler(event, context):
+def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
     """
     Lambda handler for S3 image processing events.
 
     Args:
         event: S3 event containing bucket and key information
-        context: Lambda context
+        _context: Lambda context (unused)
 
     Returns:
         Response with processing status

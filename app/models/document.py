@@ -4,12 +4,13 @@ from sqlalchemy import BigInteger, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
+from app.models.project import Project
 
 
 class Document(Base, TimestampMixin):
     """Document model for project attachments (PDF, DOCX)."""
 
-    __tablename__ = "documents"
+    __tablename__ = "documents"  # type: ignore[assignment]
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     project_id: Mapped[int] = mapped_column(

@@ -10,7 +10,7 @@ from app.models.project_access import ProjectAccess
 class User(Base, TimestampMixin):
     """User model for authentication and project ownership."""
 
-    __tablename__ = "users"
+    __tablename__ = "users"  # type: ignore[assignment]
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     login: Mapped[str] = mapped_column(String(100), unique=True, index=True, nullable=False)

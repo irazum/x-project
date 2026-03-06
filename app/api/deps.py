@@ -37,7 +37,14 @@ async def get_current_user(
     """
     try:
         payload = decode_access_token(credentials.credentials)
-        user_id = int(payload.get("sub"))
+        sub = payload.get("sub")
+        if sub is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token: missing subject",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        user_id = int(sub)
     except (InvalidTokenError, ValueError, TypeError) as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

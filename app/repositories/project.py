@@ -31,7 +31,7 @@ class ProjectRepository(BaseRepository[Project]):
             .options(selectinload(Project.documents))
             .where(Project.id == project_id)
         )
-        return result.scalar_one_or_none()
+        return result.scalar_one_or_none()  # type: ignore[no-any-return]
 
     async def get_user_projects(
         self,
@@ -77,7 +77,7 @@ class ProjectRepository(BaseRepository[Project]):
             .join(ProjectAccess, Project.id == ProjectAccess.project_id)
             .where(ProjectAccess.user_id == user_id)
         )
-        return result.scalar_one()
+        return result.scalar_one()  # type: ignore[no-any-return]
 
     async def create_project(
         self,

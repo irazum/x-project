@@ -11,7 +11,7 @@ from app.models.project_access import ProjectAccess
 class Project(Base, TimestampMixin):
     """Project model containing project details."""
 
-    __tablename__ = "projects"
+    __tablename__ = "projects"  # type: ignore[assignment]
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)

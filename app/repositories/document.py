@@ -84,4 +84,4 @@ class DocumentRepository(BaseRepository[Document]):
         result = await self.session.execute(
             select(Document.project_id).where(Document.id == document_id)
         )
-        return result.scalar_one_or_none()
+        return result.scalar_one_or_none()  # type: ignore[no-any-return]

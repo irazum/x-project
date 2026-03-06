@@ -1,5 +1,6 @@
 """FastAPI application entry point."""
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request, status
@@ -12,7 +13,7 @@ from app.core.exceptions import AppException
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager."""
     # Startup
     yield
@@ -45,7 +46,7 @@ def create_app() -> FastAPI:
 
     # Global exception handlers
     @app.exception_handler(AppException)
-    async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
+    async def app_exception_handler(_request: Request, exc: AppException) -> JSONResponse:
         """Handle application exceptions."""
         return JSONResponse(
             status_code=exc.status_code,
@@ -56,7 +57,7 @@ def create_app() -> FastAPI:
         )
 
     @app.exception_handler(HTTPException)
-    async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    async def http_exception_handler(_request: Request, exc: HTTPException) -> JSONResponse:
         """Handle HTTP exceptions."""
         return JSONResponse(
             status_code=exc.status_code,
@@ -64,7 +65,7 @@ def create_app() -> FastAPI:
         )
 
     @app.exception_handler(Exception)
-    async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    async def general_exception_handler(_request: Request, exc: Exception) -> JSONResponse:
         """Handle unexpected exceptions."""
         if settings.debug:
             return JSONResponse(

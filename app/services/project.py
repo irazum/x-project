@@ -183,6 +183,8 @@ class ProjectService:
             name=data.name,
             description=data.description,
         )
+        if not updated:
+            raise NotFoundError("Project was deleted during update", project_id)
 
         return ProjectInfoResponse(
             id=updated.id,

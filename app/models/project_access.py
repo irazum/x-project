@@ -6,6 +6,8 @@ from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
+from app.models.project import Project
+from app.models.user import User
 
 
 class AccessRole(str, Enum):
@@ -24,7 +26,7 @@ class ProjectAccess(Base, TimestampMixin):
     - participant: Can view and modify, cannot delete project
     """
 
-    __tablename__ = "project_accesses"
+    __tablename__ = "project_accesses"  # type: ignore[assignment]
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(
@@ -59,7 +61,7 @@ class ProjectAccess(Base, TimestampMixin):
     @property
     def is_owner(self) -> bool:
         """Check if the access grants owner privileges."""
-        return self.role == AccessRole.OWNER.value
+        return bool(self.role == AccessRole.OWNER.value)
 
     def __repr__(self) -> str:
         return f"<ProjectAccess(user_id={self.user_id}, project_id={self.project_id}, role='{self.role}')>"

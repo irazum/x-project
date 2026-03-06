@@ -1,6 +1,6 @@
 """Authentication schemas."""
 
-from pydantic import Field, field_validator
+from pydantic import Field, ValidationInfo, field_validator
 
 from app.schemas.base import BaseSchema
 
@@ -46,7 +46,7 @@ class RegisterRequest(BaseSchema):
 
     @field_validator("repeat_password")
     @classmethod
-    def passwords_match(cls, v: str, info) -> str:
+    def passwords_match(cls, v: str, info: ValidationInfo) -> str:
         """Validate that passwords match."""
         if "password" in info.data and v != info.data["password"]:
             raise ValueError("Passwords do not match")

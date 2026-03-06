@@ -25,7 +25,7 @@ class UserRepository(BaseRepository[User]):
             The user if found, None otherwise
         """
         result = await self.session.execute(select(User).where(User.login == login.lower()))
-        return result.scalar_one_or_none()
+        return result.scalar_one_or_none()  # type: ignore[no-any-return]
 
     async def get_by_email(self, email: str) -> User | None:
         """
@@ -38,7 +38,7 @@ class UserRepository(BaseRepository[User]):
             The user if found, None otherwise
         """
         result = await self.session.execute(select(User).where(User.email == email.lower()))
-        return result.scalar_one_or_none()
+        return result.scalar_one_or_none()  # type: ignore[no-any-return]
 
     async def login_exists(self, login: str) -> bool:
         """

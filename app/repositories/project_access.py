@@ -35,7 +35,7 @@ class ProjectAccessRepository(BaseRepository[ProjectAccess]):
                 ProjectAccess.project_id == project_id,
             )
         )
-        return result.scalar_one_or_none()
+        return result.scalar_one_or_none()  # type: ignore[no-any-return]
 
     async def has_access(self, user_id: int, project_id: int) -> bool:
         """
@@ -119,7 +119,7 @@ class ProjectAccessRepository(BaseRepository[ProjectAccess]):
             )
         )
         await self.session.flush()
-        return result.rowcount > 0
+        return bool(result.rowcount > 0)
 
     async def get_project_participants(
         self,

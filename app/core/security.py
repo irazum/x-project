@@ -15,12 +15,12 @@ pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plain password against its hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    return bool(pwd_context.verify(plain_password, hashed_password))
 
 
 def get_password_hash(password: str) -> str:
     """Hash a password using argon2."""
-    return pwd_context.hash(password)
+    return str(pwd_context.hash(password))
 
 
 def create_access_token(
@@ -54,11 +54,12 @@ def create_access_token(
     if additional_claims:
         to_encode.update(additional_claims)
 
-    return jwt.encode(
+    encoded: str = jwt.encode(
         to_encode,
         settings.jwt_secret_key,
         algorithm=settings.jwt_algorithm,
     )
+    return encoded
 
 
 def decode_access_token(token: str) -> dict[str, Any]:
@@ -75,7 +76,7 @@ def decode_access_token(token: str) -> dict[str, Any]:
         InvalidTokenError: If token is invalid or expired
     """
     try:
-        payload = jwt.decode(
+        payload: dict[str, Any] = jwt.decode(
             token,
             settings.jwt_secret_key,
             algorithms=[settings.jwt_algorithm],
@@ -110,11 +111,12 @@ def create_share_token(project_id: int, expires_hours: int = 72) -> str:
         "type": "share",
     }
 
-    return jwt.encode(
+    encoded: str = jwt.encode(
         to_encode,
         settings.jwt_secret_key,
         algorithm=settings.jwt_algorithm,
     )
+    return encoded
 
 
 def decode_share_token(token: str) -> dict[str, Any]:
@@ -131,7 +133,7 @@ def decode_share_token(token: str) -> dict[str, Any]:
         InvalidTokenError: If token is invalid or expired
     """
     try:
-        payload = jwt.decode(
+        payload: dict[str, Any] = jwt.decode(
             token,
             settings.jwt_secret_key,
             algorithms=[settings.jwt_algorithm],
