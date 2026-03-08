@@ -296,6 +296,55 @@ alembic downgrade -1
 
 See `.env.example` for all available options.
 
+## Deployment (AWS EC2)
+
+### Prerequisites
+- AWS EC2 instance (Ubuntu 22.04+, t3.small or larger)
+- Security group: ports 22 (SSH), 80 (HTTP), 443 (HTTPS)
+- An S3 bucket for file storage
+- A domain name (optional, for HTTPS)
+
+### First-time EC2 setup
+
+```bash
+# Run the setup script on a fresh EC2 instance
+ssh ubuntu@<ec2-ip> 'bash -s' < deploy/setup-ec2.sh
+
+# Then SSH in and finish setup
+ssh ubuntu@<ec2-ip>
+cd /opt/app
+git clone <your-repo-url> .
+cp .env.production.example .env.production
+nano .env.production  # fill in real credentials
+
+# Start services
+docker compose -f docker-compose.prod.yml --profile migration run --rm migrate
+docker compose -f docker-compose.prod.yml up -d
+```
+
+### CI/CD with GitHub Actions
+
+The pipeline runs automatically on push to `main`:
+1. **Lint** — ruff + mypy
+2. **Test** — pytest with PostgreSQL service container
+3. **Build** — Docker image pushed to GitHub Container Registry (ghcr.io)
+4. **Deploy** — SSH into EC2, pull latest image, run migrations, restart
+
+#### Required GitHub Secrets
+
+Set these in **Settings → Secrets and variables → Actions**:
+
+| Secret | Description |
+|--------|-------------|
+| `EC2_HOST` | EC2 public IP or domain |
+| `EC2_USERNAME` | SSH user (e.g., `ubuntu`) |
+| `EC2_SSH_KEY` | Private SSH key for EC2 access |
+| `GHCR_TOKEN` | GitHub PAT with `read:packages` scope |
+
+#### Required GitHub Environment
+
+Create a **`production`** environment in **Settings → Environments** for deployment protection rules (optional: require approval).
+
 ## License
 
 MIT License

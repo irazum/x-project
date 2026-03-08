@@ -131,22 +131,30 @@ jobs:
           cache-to: type=gha,mode=max
 
   deploy:
-    name: Deploy to Cloud
+    name: Deploy to EC2
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: production
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Add your deployment steps here
-      # Example for AWS ECS, Azure Container Apps, or Kubernetes
-      - name: Deploy notification
-        run: |
-          echo "🚀 Ready to deploy to production!"
-          echo "Add your deployment commands here"
-          # Example: aws ecs update-service ...
-          # Example: az containerapp update ...
-          # Example: kubectl apply -f k8s/
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /opt/app
+            # Pull latest code
+            git pull origin main
+            # Login to GitHub Container Registry
+            echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            # Pull the latest image
+            docker compose -f docker-compose.prod.yml pull api
+            # Run migrations
+            docker compose -f docker-compose.prod.yml --profile migration run --rm migrate
+            # Restart the app with zero-downtime
+            docker compose -f docker-compose.prod.yml up -d --no-deps api
+            # Clean up old images
+            docker image prune -f
