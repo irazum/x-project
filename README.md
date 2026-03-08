@@ -298,24 +298,47 @@ See `.env.example` for all available options.
 
 ## Deployment (AWS EC2)
 
-### Prerequisites
-- AWS EC2 instance (Ubuntu 22.04+, t3.small or larger)
-- Security group: ports 22 (SSH), 80 (HTTP), 443 (HTTPS)
-- An S3 bucket for file storage
-- A domain name (optional, for HTTPS)
+### Infrastructure with Terraform
 
-### First-time EC2 setup
+Provision the EC2 instance, security group, IAM role, and S3 bucket:
 
 ```bash
-# Run the setup script on a fresh EC2 instance
-ssh ubuntu@<ec2-ip> 'bash -s' < deploy/setup-ec2.sh
+cd terraform
 
-# Then SSH in and finish setup
-ssh ubuntu@<ec2-ip>
+# Configure your variables
+cp terraform.tfvars.example terraform.tfvars
+# Edit terraform.tfvars — set your SSH public key and preferences
+
+# Initialize and apply
+terraform init
+terraform plan        # review what will be created
+terraform apply       # create the resources
+
+# Get the EC2 IP
+terraform output public_ip
+```
+
+This creates:
+- **EC2 instance** (Ubuntu 22.04, t3.small) with Docker pre-installed via user-data
+- **Security group** — ports 22, 80, 443, 8000
+- **IAM role** — EC2 can access S3 without hardcoded AWS keys
+- **S3 bucket** — private, encrypted, with CORS for presigned URLs
+
+### First-time app setup (after Terraform)
+
+```bash
+# SSH into the new instance
+ssh ubuntu@$(cd terraform && terraform output -raw public_ip)
+
+# Clone your repo
 cd /opt/app
 git clone <your-repo-url> .
+
+# Configure production environment
 cp .env.production.example .env.production
 nano .env.production  # fill in real credentials
+# Note: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are not needed
+# if using the IAM role (EC2 gets S3 access automatically)
 
 # Start services
 docker compose -f docker-compose.prod.yml --profile migration run --rm migrate

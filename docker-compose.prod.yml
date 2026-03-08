@@ -1,8 +1,6 @@
 services:
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${DOCKER_IMAGE:-ghcr.io/your-username/x_project:latest}
     ports:
       - "8000:8000"
     env_file:
@@ -33,9 +31,7 @@ services:
     restart: unless-stopped
 
   migrate:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${DOCKER_IMAGE:-ghcr.io/your-username/x_project:latest}
     command: ["alembic", "upgrade", "head"]
     env_file:
       - .env.production
