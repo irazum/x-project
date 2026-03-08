@@ -1,5 +1,7 @@
 """Authentication service."""
 
+import asyncio
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -44,8 +46,8 @@ class AuthService:
         if data.email and await self.user_repo.email_exists(data.email):
             raise AlreadyExistsError("User", "email", data.email)
 
-        # Hash password and create user
-        hashed_password = get_password_hash(data.password)
+        # Hash password and create user (offload CPU-bound argon2 to thread pool)
+        hashed_password = await asyncio.to_thread(get_password_hash, data.password)
         user = await self.user_repo.create_user(
             login=data.login,
             hashed_password=hashed_password,
@@ -73,8 +75,8 @@ class AuthService:
         if not user:
             raise InvalidCredentialsError()
 
-        # Verify password
-        if not verify_password(data.password, user.hashed_password):
+        # Verify password (offload CPU-bound argon2 to thread pool)
+        if not await asyncio.to_thread(verify_password, data.password, user.hashed_password):
             raise InvalidCredentialsError()
 
         # Check if user is active

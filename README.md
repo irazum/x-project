@@ -208,7 +208,7 @@ uv run pytest
 uv run pytest tests/unit/ -v
 
 # Run only integration tests (requires database)
-uv run pytest tests/api/ -v
+uv run pytest tests/integration/ -v
 
 # Run with coverage report
 uv run pytest --cov=app --cov-report=html

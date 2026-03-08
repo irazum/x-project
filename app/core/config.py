@@ -36,7 +36,6 @@ class Settings(BaseSettings):
 
     # JWT Authentication
     jwt_secret_key: str = Field(
-        default="change-me-in-production",
         min_length=32,
         description="Secret key for JWT token signing",
     )
