@@ -7,7 +7,7 @@ A FastAPI-based project management dashboard API with PostgreSQL, SQLAlchemy, an
 - 🔐 JWT-based authentication
 - 📁 Project CRUD operations
 - 📄 Document management (upload, download, delete)
-- 🖼️ Logo management with automatic resizing
+- 🖼️ Logo management with Lambda-powered image processing
 - 👥 Project sharing and access control
 - 🐳 Docker support
 - 🧪 Comprehensive test suite
@@ -47,6 +47,9 @@ A FastAPI-based project management dashboard API with PostgreSQL, SQLAlchemy, an
 │   ├── services/             # Business logic
 │   └── main.py               # Application entry point
 ├── alembic/                  # Database migrations
+├── lambdas/
+│   └── image_processor/      # S3-triggered image resize Lambda
+├── terraform/                # AWS infrastructure (EC2, S3, Lambda, IAM)
 ├── tests/                    # Test suite
 ├── docker/                   # Docker configurations
 ├── .github/workflows/        # CI/CD pipelines
@@ -337,6 +340,29 @@ This creates:
 - **Security group** — ports 22, 80, 443, 8000
 - **IAM role** — EC2 can access S3 without hardcoded AWS keys
 - **S3 bucket** — private, encrypted, with CORS for presigned URLs
+- **Lambda function** — image processor triggered by S3 uploads (see below)
+
+### Image Processor Lambda
+
+When a logo is uploaded, the API writes the original to `uploads/logos/{project_id}/original.jpg` in S3. An S3 event notification triggers the **image-processor** Lambda, which resizes the image and creates a thumbnail:
+
+```
+uploads/logos/{id}/original.jpg  →  Lambda trigger
+  ↓
+logos/{id}/logo.jpg              (resized, max 800×800)
+logos/{id}/thumb.jpg             (center-cropped 200×200)
+```
+
+The S3 notification only fires on the `uploads/logos/` prefix, so the Lambda's output to `logos/` does **not** re-trigger itself.
+
+**Build the Pillow Lambda layer** (one-time, requires Docker):
+```bash
+cd lambdas && ./build_layer.sh
+```
+
+This produces `lambdas/layers/pillow.zip` which Terraform uploads as a Lambda layer. You only need to rebuild this when upgrading the Pillow version.
+
+`terraform apply` handles everything else: packaging the handler code, creating the IAM role (least-privilege S3 + CloudWatch Logs), deploying the function, and wiring the S3 trigger.
 
 ### First-time app setup (after Terraform)
 

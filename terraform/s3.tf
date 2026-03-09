@@ -44,3 +44,16 @@ resource "aws_s3_bucket_cors_configuration" "files" {
     max_age_seconds = 3000
   }
 }
+
+# S3 event notification — trigger Lambda on logo uploads
+resource "aws_s3_bucket_notification" "logo_upload" {
+  bucket = aws_s3_bucket.files.id
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.image_processor.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = "uploads/logos/"
+  }
+
+  depends_on = [aws_lambda_permission.s3_invoke]
+}

@@ -22,3 +22,15 @@ output "ssh_command" {
   description = "SSH command to connect"
   value       = "ssh ubuntu@${aws_eip.app.public_ip}"
 }
+
+# --- Lambda ---
+
+output "lambda_function_name" {
+  description = "Image processor Lambda function name"
+  value       = aws_lambda_function.image_processor.function_name
+}
+
+output "lambda_function_arn" {
+  description = "Image processor Lambda function ARN"
+  value       = aws_lambda_function.image_processor.arn
+}

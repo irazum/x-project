@@ -32,3 +32,29 @@ variable "s3_bucket_name" {
   type        = string
   default     = "project-management-files"
 }
+
+# --- Lambda: Image Processor ---
+
+variable "lambda_memory_size" {
+  description = "Memory (MB) allocated to the image processor Lambda"
+  type        = number
+  default     = 512
+}
+
+variable "lambda_timeout" {
+  description = "Timeout (seconds) for the image processor Lambda"
+  type        = number
+  default     = 30
+}
+
+variable "lambda_log_retention_days" {
+  description = "CloudWatch log retention in days for the Lambda"
+  type        = number
+  default     = 14
+}
+
+variable "pillow_layer_zip_path" {
+  description = "Path to the Pillow Lambda layer zip file"
+  type        = string
+  default     = "../lambdas/layers/pillow.zip"
+}

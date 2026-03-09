@@ -106,3 +106,7 @@ terraform/*.tfstate
 terraform/*.tfstate.backup
 terraform/.terraform.lock.hcl
 terraform/terraform.tfvars
+terraform/.build/
+
+# Lambda layers (built locally, not committed)
+lambdas/layers/*.zip
