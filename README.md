@@ -406,6 +406,7 @@ Set these in **Settings → Secrets and variables → Actions**:
 | `EC2_HOST` | EC2 public IP or domain |
 | `EC2_USERNAME` | SSH user (e.g., `ubuntu`) |
 | `EC2_SSH_KEY` | Private SSH key for EC2 access |
+| `EC2_SSH_PASSPHRASE` | Passphrase for the SSH key (if set) |
 | `GHCR_TOKEN` | GitHub PAT with `read:packages` scope |
 
 #### Required GitHub Environment
