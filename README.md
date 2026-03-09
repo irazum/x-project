@@ -112,6 +112,20 @@ docker-compose exec api alembic upgrade head
 docker-compose logs -f api
 ```
 
+### LocalStack (S3 in Development)
+
+LocalStack emulates AWS S3 locally. The S3 bucket is created automatically on startup via [docker/localstack-init/init-s3.sh](docker/localstack-init/init-s3.sh).
+
+If the bucket is missing (e.g., after `docker-compose down -v`), recreate it:
+```bash
+docker-compose exec localstack bash /etc/localstack/init/ready.d/init-s3.sh
+```
+
+Verify the bucket exists:
+```bash
+docker-compose exec localstack awslocal s3 ls
+```
+
 ### Production Deployment
 
 ```bash
