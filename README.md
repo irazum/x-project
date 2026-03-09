@@ -317,7 +317,18 @@ See `.env.example` for all available options.
 
 ### Infrastructure with Terraform
 
-Provision the EC2 instance, security group, IAM role, and S3 bucket:
+
+1. **Build the Pillow Lambda layer** (one-time, requires Docker):
+```bash
+cd lambdas && ./build_layer.sh
+```
+
+This produces `lambdas/layers/pillow.zip` which Terraform uploads as a Lambda layer. You only need to rebuild this when upgrading the Pillow version.
+
+`terraform` handles everything else: packaging the handler code, creating the IAM role (least-privilege S3 + CloudWatch Logs), deploying the function, and wiring the S3 trigger.
+
+
+2. **Provision the EC2 instance, security group, IAM role, and S3 bucket**:
 
 ```bash
 cd terraform
@@ -354,15 +365,6 @@ logos/{id}/thumb.jpg             (center-cropped 200×200)
 ```
 
 The S3 notification only fires on the `uploads/logos/` prefix, so the Lambda's output to `logos/` does **not** re-trigger itself.
-
-**Build the Pillow Lambda layer** (one-time, requires Docker):
-```bash
-cd lambdas && ./build_layer.sh
-```
-
-This produces `lambdas/layers/pillow.zip` which Terraform uploads as a Lambda layer. You only need to rebuild this when upgrading the Pillow version.
-
-`terraform apply` handles everything else: packaging the handler code, creating the IAM role (least-privilege S3 + CloudWatch Logs), deploying the function, and wiring the S3 trigger.
 
 ### First-time app setup (after Terraform)
 
