@@ -52,7 +52,19 @@ class Settings(BaseSettings):
     # File Upload
     max_upload_size_mb: int = 50
     allowed_document_types: str = (
-        "application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        "application/pdf,"
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document,"
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,"
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation,"
+        "application/msword,"
+        "application/vnd.ms-excel,"
+        "application/vnd.ms-powerpoint,"
+        "text/csv,"
+        "text/plain,"
+        "application/json,"
+        "application/zip,"
+        "application/xml,"
+        "text/xml"
     )
     allowed_image_types: str = "image/jpeg,image/png,image/gif,image/webp"
 

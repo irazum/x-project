@@ -19,16 +19,16 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY pyproject.toml uv.lock ./
 
 # Create venv and install dependencies
-ENV VIRTUAL_ENV="/app/venv"
-ENV PATH="/app/venv/bin:$PATH"
+ENV VIRTUAL_ENV="/app/.venv"
+ENV PATH="/app/.venv/bin:$PATH"
 ENV UV_LINK_MODE=copy
-RUN uv venv /app/venv && uv sync --frozen --no-install-project --no-dev
+RUN uv venv /app/.venv && uv sync --frozen --no-install-project --no-dev
 
 # Copy application code
 COPY --chown=appuser:appuser . .
 
 # Fix venv ownership for appuser
-RUN chown -R appuser:appuser /app/venv
+RUN chown -R appuser:appuser /app/.venv
 
 # Switch to non-root user
 USER appuser
