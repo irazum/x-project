@@ -11,6 +11,7 @@ from app.core.exceptions import (
     FileTooLargeError,
     InvalidFileTypeError,
     NotFoundError,
+    StorageError,
 )
 from app.repositories.document import DocumentRepository
 from app.repositories.project import ProjectRepository
@@ -356,7 +357,14 @@ class LogoService:
             settings.logo_thumbnail_key(project_id) if thumbnail else settings.logo_key(project_id)
         )
 
-        content, content_type = await storage_service.download_file(key)
+        try:
+            content, content_type = await storage_service.download_file(key)
+        except StorageError:
+            # Lambda hasn't processed the image yet — fall back to the original upload
+            content, content_type = await storage_service.download_file(
+                settings.logo_original_key(project_id)
+            )
+
         return content, content_type
 
     async def upsert_logo(
