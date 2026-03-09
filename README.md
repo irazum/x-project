@@ -371,6 +371,8 @@ The S3 notification only fires on the `uploads/logos/` prefix, so the Lambda's o
 ```bash
 # SSH into the new instance
 ssh ubuntu@$(cd terraform && terraform output -raw public_ip)
+# if you generated a custome ssh key use the following command instead:
+ssh -i <path_to_the_cusome ssh key secret> ubuntu@$(cd terraform && terraform output -raw public_ip)
 
 # Clone your repo
 cd /opt/app

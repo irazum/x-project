@@ -24,8 +24,8 @@ class StorageService:
         if self._client is None:
             self._client = boto3.client(
                 "s3",
-                aws_access_key_id=settings.aws_access_key_id,
-                aws_secret_access_key=settings.aws_secret_access_key,
+                aws_access_key_id=settings.aws_access_key_id or None,
+                aws_secret_access_key=settings.aws_secret_access_key or None,
                 region_name=settings.aws_region,
                 endpoint_url=settings.s3_endpoint_url,
             )
