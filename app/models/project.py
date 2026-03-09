@@ -1,9 +1,17 @@
 """Project model."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Boolean, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.document import Document
+    from app.models.project_access import ProjectAccess
 
 
 class Project(Base, TimestampMixin):
@@ -19,12 +27,12 @@ class Project(Base, TimestampMixin):
     has_logo: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     # Relationships
-    documents: Mapped[list["Document"]] = relationship(  # noqa: F821 (can not import Document due to circular import)
+    documents: Mapped[list[Document]] = relationship(  # noqa: F821 (can not import Document due to circular import)
         "Document",
         back_populates="project",
         cascade="all, delete-orphan",
     )
-    accesses: Mapped[list["ProjectAccess"]] = relationship(  # noqa: F821
+    accesses: Mapped[list[ProjectAccess]] = relationship(  # noqa: F821
         "ProjectAccess",
         back_populates="project",
         cascade="all, delete-orphan",

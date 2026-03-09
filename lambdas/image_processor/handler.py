@@ -93,7 +93,7 @@ def process_image(bucket: str, key: str) -> None:
     image_content = response["Body"].read()
 
     # Open with PIL
-    image = Image.open(io.BytesIO(image_content))
+    image: Image.Image = Image.open(io.BytesIO(image_content))
 
     # Convert RGBA/P to RGB
     if image.mode in ("RGBA", "P"):

@@ -1,9 +1,16 @@
 """User model."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.project_access import ProjectAccess
 
 
 class User(Base, TimestampMixin):
@@ -18,7 +25,7 @@ class User(Base, TimestampMixin):
     is_active: Mapped[bool] = mapped_column(default=True)
 
     # Relationships
-    project_accesses: Mapped[list["ProjectAccess"]] = relationship(  # noqa: F821
+    project_accesses: Mapped[list[ProjectAccess]] = relationship(  # noqa: F821
         "ProjectAccess",
         back_populates="user",
         cascade="all, delete-orphan",

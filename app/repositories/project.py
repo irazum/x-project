@@ -58,7 +58,7 @@ class ProjectRepository(BaseRepository[Project]):
             .offset(skip)
             .limit(limit)
         )
-        return list(result.all())
+        return [(project, role) for project, role in result.all()]
 
     async def count_user_projects(self, user_id: int) -> int:
         """

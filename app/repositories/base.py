@@ -38,7 +38,7 @@ class BaseRepository[ModelType: Base]:
         Returns:
             The record if found, None otherwise
         """
-        result = await self.session.execute(select(self.model).where(self.model.id == id))
+        result = await self.session.execute(select(self.model).where(self.model.id == id))  # type: ignore[attr-defined]
         return result.scalar_one_or_none()  # type: ignore[no-any-return]
 
     async def get_by_ids(self, ids: list[int]) -> list[ModelType]:
@@ -53,7 +53,7 @@ class BaseRepository[ModelType: Base]:
         """
         if not ids:
             return []
-        result = await self.session.execute(select(self.model).where(self.model.id.in_(ids)))
+        result = await self.session.execute(select(self.model).where(self.model.id.in_(ids)))  # type: ignore[attr-defined]
         return list(result.scalars().all())
 
     async def get_all(
@@ -108,7 +108,7 @@ class BaseRepository[ModelType: Base]:
             return await self.get(id)
 
         await self.session.execute(
-            update(self.model).where(self.model.id == id).values(**update_data)
+            update(self.model).where(self.model.id == id).values(**update_data)  # type: ignore[attr-defined]
         )
         await self.session.flush()
         return await self.get(id)
@@ -123,9 +123,9 @@ class BaseRepository[ModelType: Base]:
         Returns:
             True if deleted, False if not found
         """
-        result = await self.session.execute(delete(self.model).where(self.model.id == id))
+        result = await self.session.execute(delete(self.model).where(self.model.id == id))  # type: ignore[attr-defined]
         await self.session.flush()
-        return bool(result.rowcount > 0)
+        return bool(result.rowcount > 0)  # type: ignore[attr-defined]
 
     async def exists(self, id: int) -> bool:
         """
@@ -137,5 +137,5 @@ class BaseRepository[ModelType: Base]:
         Returns:
             True if exists, False otherwise
         """
-        result = await self.session.execute(select(self.model.id).where(self.model.id == id))
+        result = await self.session.execute(select(self.model.id).where(self.model.id == id))  # type: ignore[attr-defined]
         return result.scalar_one_or_none() is not None

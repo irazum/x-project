@@ -109,7 +109,7 @@ class DocumentService:
         uploaded_documents = []
 
         for file in files:
-            # Validate file
+            # Validate file (raises if filename/content_type missing)
             await self._validate_document_file(file)
 
             # Read file content
@@ -119,17 +119,17 @@ class DocumentService:
             # Upload to S3
             storage_key = await storage_service.upload_file(
                 file=file_obj,
-                filename=file.filename,
-                content_type=file.content_type,
+                filename=file.filename,  # type: ignore[arg-type]
+                content_type=file.content_type,  # type: ignore[arg-type]
                 prefix=f"documents/{project_id}",
             )
 
             # Create database record
             document = await self.document_repo.create_document(
                 project_id=project_id,
-                filename=file.filename,
-                original_filename=file.filename,
-                content_type=file.content_type,
+                filename=file.filename,  # type: ignore[arg-type]
+                original_filename=file.filename,  # type: ignore[arg-type]
+                content_type=file.content_type,  # type: ignore[arg-type]
                 file_size=len(content),
                 storage_key=storage_key,
             )
@@ -212,7 +212,7 @@ class DocumentService:
         if not await self.access_repo.has_access(user_id, document.project_id):
             raise AuthorizationError("You don't have access to this document")
 
-        # Validate new file
+        # Validate new file (raises if filename/content_type missing)
         await self._validate_document_file(file)
 
         # Read file content
@@ -225,17 +225,17 @@ class DocumentService:
         # Upload new file
         storage_key = await storage_service.upload_file(
             file=file_obj,
-            filename=file.filename,
-            content_type=file.content_type,
+            filename=file.filename,  # type: ignore[arg-type]
+            content_type=file.content_type,  # type: ignore[arg-type]
             prefix=f"documents/{document.project_id}",
         )
 
         # Update database record
         updated = await self.document_repo.update(
             document_id,
-            filename=file.filename,
-            original_filename=file.filename,
-            content_type=file.content_type,
+            filename=file.filename,  # type: ignore[arg-type]
+            original_filename=file.filename,  # type: ignore[arg-type]
+            content_type=file.content_type,  # type: ignore[arg-type]
             file_size=len(content),
             storage_key=storage_key,
         )
@@ -294,7 +294,13 @@ class DocumentService:
         Raises:
             FileTooLargeError: If file exceeds size limit
             InvalidFileTypeError: If file type is not allowed
+            ValueError: If filename or content_type is missing
         """
+        if not file.filename:
+            raise ValueError("Filename is required")
+        if not file.content_type:
+            raise ValueError("Content-Type is required")
+
         # Check content type
         allowed_types = settings.allowed_document_types_list
         if file.content_type not in allowed_types:
@@ -392,6 +398,9 @@ class LogoService:
 
         if not await self.access_repo.has_access(user_id, project_id):
             raise AuthorizationError("You don't have access to this project")
+
+        if not file.content_type:
+            raise ValueError("Content-Type is required")
 
         allowed_types = settings.allowed_image_types_list
         if file.content_type not in allowed_types:

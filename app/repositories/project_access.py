@@ -119,7 +119,7 @@ class ProjectAccessRepository(BaseRepository[ProjectAccess]):
             )
         )
         await self.session.flush()
-        return bool(result.rowcount > 0)
+        return bool(result.rowcount > 0)  # type: ignore[attr-defined]
 
     async def get_project_participants(
         self,
