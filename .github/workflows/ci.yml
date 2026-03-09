@@ -32,13 +32,13 @@ jobs:
         run: uv sync --dev
 
       - name: Run Ruff linter
-        run: uv run ruff check .
+        run: uv run ruff check app lambdas
 
       - name: Run Ruff formatter check
-        run: uv run ruff format --check .
+        run: uv run ruff format --check app lambdas
 
       - name: Run MyPy type checker
-        run: uv run mypy app --ignore-missing-imports
+        run: uv run mypy app lambdas --ignore-missing-imports
 
   test:
     name: Run Tests

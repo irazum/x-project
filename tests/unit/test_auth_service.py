@@ -205,9 +205,8 @@ class TestAuthServiceLogin:
         )
 
         # Execute and verify
-        with patch("app.services.auth.verify_password", return_value=False):
-            with pytest.raises(InvalidCredentialsError):
-                await auth_service.login(request)
+        with patch("app.services.auth.verify_password", return_value=False), pytest.raises(InvalidCredentialsError):
+            await auth_service.login(request)
 
     @pytest.mark.asyncio
     async def test_login_inactive_user(

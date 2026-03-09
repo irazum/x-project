@@ -1,6 +1,6 @@
 """Project access model for managing user permissions."""
 
-from enum import Enum
+from enum import StrEnum
 
 from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -10,7 +10,7 @@ from app.models.project import Project
 from app.models.user import User
 
 
-class AccessRole(str, Enum):
+class AccessRole(StrEnum):
     """Access role enumeration."""
 
     OWNER = "owner"
