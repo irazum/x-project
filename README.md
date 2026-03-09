@@ -381,8 +381,8 @@ git clone <your-repo-url> .
 # Configure production environment
 cp .env.production.example .env.production
 nano .env.production  # fill in real credentials
-# Note: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are not needed
-# if using the IAM role (EC2 gets S3 access automatically)
+# or this command instead if you already filled in .env.production locally
+scp -i ~/.ssh/id_ed25519_aws .env.production ubuntu@$(cd terraform && terraform output -raw public_ip):/opt/app/.env.production
 
 # Start services
 docker compose -f docker-compose.prod.yml --profile migration run --rm migrate
