@@ -2,6 +2,7 @@
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.exceptions import (
     AuthorizationError,
     NotFoundError,
@@ -64,7 +65,7 @@ class ProjectService:
             id=project.id,
             name=project.name,
             description=project.description,
-            has_logo=project.logo_key is not None,
+            has_logo=project.has_logo,
             created_at=project.created_at,
             updated_at=project.updated_at,
             user_role=AccessRole.OWNER.value,
@@ -90,7 +91,7 @@ class ProjectService:
                     id=project.id,
                     name=project.name,
                     description=project.description,
-                    has_logo=project.logo_key is not None,
+                    has_logo=project.has_logo,
                     documents=[
                         {
                             "id": doc.id,
@@ -142,7 +143,7 @@ class ProjectService:
             id=project.id,
             name=project.name,
             description=project.description,
-            has_logo=project.logo_key is not None,
+            has_logo=project.has_logo,
             created_at=project.created_at,
             updated_at=project.updated_at,
             user_role=access.role,
@@ -190,7 +191,7 @@ class ProjectService:
             id=updated.id,
             name=updated.name,
             description=updated.description,
-            has_logo=updated.logo_key is not None,
+            has_logo=updated.has_logo,
             created_at=updated.created_at,
             updated_at=updated.updated_at,
             user_role=access.role,
@@ -221,11 +222,9 @@ class ProjectService:
             raise OwnerRequiredError("delete this project")
 
         # Collect S3 keys to delete
-        keys_to_delete = []
-        if project.logo_key:
-            keys_to_delete.append(project.logo_key)
-        if project.logo_thumbnail_key:
-            keys_to_delete.append(project.logo_thumbnail_key)
+        keys_to_delete: list[str] = []
+        if project.has_logo:
+            keys_to_delete.extend(settings.logo_all_keys(project_id))
         for doc in project.documents:
             keys_to_delete.append(doc.storage_key)
 

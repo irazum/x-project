@@ -1,23 +1,34 @@
 """AWS Lambda function for image processing on S3 events.
 
-This Lambda function is triggered when an image is uploaded to S3.
-It processes the image (resizing, creating thumbnails) and stores the result.
+This Lambda function is triggered when an image is uploaded to the
+`uploads/logos/` prefix in S3. It processes the image (resize + thumbnail)
+and writes results to the `logos/` prefix — which does NOT trigger this
+Lambda again, avoiding infinite loops.
 
-Deploy this function with appropriate IAM permissions for S3 access.
+Convention-based paths:
+  API uploads to:  uploads/logos/{project_id}/original.jpg  → triggers Lambda
+  Lambda writes:   logos/{project_id}/logo.jpg               (no trigger)
+                   logos/{project_id}/thumb.jpg               (no trigger)
+
+The S3 event notification must be configured with prefix filter: uploads/logos/
 """
 
 import io
 import json
+import os
+import re
 import urllib.parse
 from typing import Any
 
 import boto3
 from PIL import Image
 
-# Configuration
-LOGO_MAX_WIDTH = 800
-LOGO_MAX_HEIGHT = 800
-THUMBNAIL_SIZE = 200
+# Configuration — should match app/core/config.py defaults
+LOGO_MAX_WIDTH = int(os.environ.get("LOGO_MAX_WIDTH", "800"))
+LOGO_MAX_HEIGHT = int(os.environ.get("LOGO_MAX_HEIGHT", "800"))
+THUMBNAIL_SIZE = int(os.environ.get("LOGO_THUMBNAIL_SIZE", "200"))
+UPLOAD_PREFIX = os.environ.get("LOGO_UPLOAD_PREFIX", "uploads/logos")
+PROCESSED_PREFIX = os.environ.get("LOGO_PROCESSED_PREFIX", "logos")
 
 s3_client = boto3.client("s3")
 
@@ -39,9 +50,9 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
         bucket = record["s3"]["bucket"]["name"]
         key = urllib.parse.unquote_plus(record["s3"]["object"]["key"])
 
-        # Skip if not in upload directory or already processed
-        if not key.startswith("uploads/logos/") or "_processed" in key:
-            print(f"Skipping {key}")
+        # Only process files in uploads/logos/ prefix
+        if not key.startswith(f"{UPLOAD_PREFIX}/"):
+            print(f"Skipping {key} — not in {UPLOAD_PREFIX}/")
             continue
 
         try:
@@ -59,12 +70,24 @@ def lambda_handler(event: dict[str, Any], _context: Any) -> dict[str, Any]:
 
 def process_image(bucket: str, key: str) -> None:
     """
-    Process an uploaded image - resize and create thumbnail.
+    Process an uploaded image — resize and create thumbnail.
+
+    Input key:   uploads/logos/{project_id}/original.jpg
+    Output keys: logos/{project_id}/logo.jpg
+                 logos/{project_id}/thumb.jpg
 
     Args:
         bucket: S3 bucket name
-        key: S3 object key
+        key: S3 object key (under uploads/logos/)
     """
+    # Extract project_id from key
+    match = re.match(rf"{re.escape(UPLOAD_PREFIX)}/(\d+)/", key)
+    if not match:
+        print(f"Could not extract project_id from key: {key}")
+        return
+
+    project_id = match.group(1)
+
     # Download the image
     response = s3_client.get_object(Bucket=bucket, Key=key)
     image_content = response["Body"].read()
@@ -82,17 +105,13 @@ def process_image(bucket: str, key: str) -> None:
     # Create thumbnail
     thumbnail = create_thumbnail(image, THUMBNAIL_SIZE)
 
-    # Generate output keys
-    base_key = key.rsplit(".", 1)[0]
-    main_key = f"{base_key}_processed.jpg"
-    thumb_key = f"{base_key}_thumb.jpg"
+    # Convention-based output paths
+    logo_key = f"{PROCESSED_PREFIX}/{project_id}/logo.jpg"
+    thumb_key = f"{PROCESSED_PREFIX}/{project_id}/thumb.jpg"
 
     # Upload processed images
-    upload_image(bucket, main_key, main_image, quality=85)
+    upload_image(bucket, logo_key, main_image, quality=85)
     upload_image(bucket, thumb_key, thumbnail, quality=80)
-
-    # Optionally delete original
-    # s3_client.delete_object(Bucket=bucket, Key=key)
 
 
 def resize_image(image: Image.Image, max_width: int, max_height: int) -> Image.Image:

@@ -1,13 +1,11 @@
 """S3 Storage service."""
 
-import io
 import uuid
 from typing import BinaryIO
 
 import boto3
 from botocore.client import BaseClient
 from botocore.exceptions import ClientError
-from PIL import Image
 
 from app.core.config import settings
 from app.core.exceptions import StorageError
@@ -86,133 +84,33 @@ class StorageService:
     async def upload_logo(
         self,
         file: BinaryIO,
-        filename: str,
         project_id: int,
-    ) -> tuple[str, str]:
+    ) -> None:
         """
-        Upload and process a logo image.
+        Upload original logo image to S3.
 
-        Resizes the image if necessary and creates a thumbnail.
+        Uses convention-based path: {upload_prefix}/{project_id}/original.jpg
+        A Lambda function triggered by S3 PUT events handles resizing
+        and thumbnail creation.
 
         Args:
             file: Image file-like object
-            filename: Original filename
-            project_id: Project ID for organizing storage
-
-        Returns:
-            Tuple of (logo_key, thumbnail_key)
+            project_id: Project ID
 
         Raises:
             StorageError: If upload fails
         """
+        key = settings.logo_original_key(project_id)
+
         try:
-            # Read and process image
-            image = Image.open(file)
-
-            # Convert to RGB if necessary (for PNG with transparency)
-            if image.mode in ("RGBA", "P"):
-                image = image.convert("RGB")
-
-            # Resize main logo if necessary
-            logo_image = self._resize_image(
-                image,
-                settings.logo_max_width,
-                settings.logo_max_height,
-            )
-
-            # Create thumbnail
-            thumbnail_image = self._create_thumbnail(
-                image,
-                settings.logo_thumbnail_size,
-            )
-
-            # Generate keys
-            base_name = filename.rsplit(".", 1)[0]
-            logo_key = f"logos/{project_id}/{uuid.uuid4().hex[:8]}_{base_name}.jpg"
-            thumbnail_key = f"logos/{project_id}/{uuid.uuid4().hex[:8]}_{base_name}_thumb.jpg"
-
-            # Upload logo
-            logo_buffer = io.BytesIO()
-            logo_image.save(logo_buffer, format="JPEG", quality=85)
-            logo_buffer.seek(0)
-
             self.client.upload_fileobj(
-                logo_buffer,
+                file,
                 settings.s3_bucket_name,
-                logo_key,
+                key,
                 ExtraArgs={"ContentType": "image/jpeg"},
             )
-
-            # Upload thumbnail
-            thumb_buffer = io.BytesIO()
-            thumbnail_image.save(thumb_buffer, format="JPEG", quality=80)
-            thumb_buffer.seek(0)
-
-            self.client.upload_fileobj(
-                thumb_buffer,
-                settings.s3_bucket_name,
-                thumbnail_key,
-                ExtraArgs={"ContentType": "image/jpeg"},
-            )
-
-            return logo_key, thumbnail_key
-
         except ClientError as e:
             raise StorageError(f"Failed to upload logo: {e}") from e
-        except Exception as e:
-            raise StorageError(f"Failed to process logo: {e}") from e
-
-    def _resize_image(
-        self,
-        image: Image.Image,
-        max_width: int,
-        max_height: int,
-    ) -> Image.Image:
-        """
-        Resize image to fit within max dimensions while maintaining aspect ratio.
-
-        Args:
-            image: PIL Image
-            max_width: Maximum width
-            max_height: Maximum height
-
-        Returns:
-            Resized image
-        """
-        if image.width <= max_width and image.height <= max_height:
-            return image.copy()
-
-        ratio = min(max_width / image.width, max_height / image.height)
-        new_size = (int(image.width * ratio), int(image.height * ratio))
-        return image.resize(new_size, Image.Resampling.LANCZOS)
-
-    def _create_thumbnail(
-        self,
-        image: Image.Image,
-        size: int,
-    ) -> Image.Image:
-        """
-        Create a square thumbnail with center crop.
-
-        Args:
-            image: PIL Image
-            size: Thumbnail size (square)
-
-        Returns:
-            Thumbnail image
-        """
-        # Calculate crop box for center crop
-        width, height = image.size
-        min_dim = min(width, height)
-
-        left = (width - min_dim) // 2
-        top = (height - min_dim) // 2
-        right = left + min_dim
-        bottom = top + min_dim
-
-        # Crop and resize
-        cropped = image.crop((left, top, right, bottom))
-        return cropped.resize((size, size), Image.Resampling.LANCZOS)
 
     async def download_file(self, key: str) -> tuple[bytes, str]:
         """

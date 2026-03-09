@@ -72,6 +72,8 @@ class Settings(BaseSettings):
     logo_max_width: int = 800
     logo_max_height: int = 800
     logo_thumbnail_size: int = 200
+    logo_upload_prefix: str = "uploads/logos"
+    logo_processed_prefix: str = "logos"
 
     # Email (Optional)
     smtp_host: str = ""
@@ -94,6 +96,26 @@ class Settings(BaseSettings):
     def allowed_image_types_list(self) -> list[str]:
         """Get allowed image MIME types as a list."""
         return [t.strip() for t in self.allowed_image_types.split(",") if t.strip()]
+
+    def logo_original_key(self, project_id: int) -> str:
+        """S3 key for the original uploaded logo (triggers Lambda)."""
+        return f"{self.logo_upload_prefix}/{project_id}/original.jpg"
+
+    def logo_key(self, project_id: int) -> str:
+        """S3 key for the processed (resized) logo."""
+        return f"{self.logo_processed_prefix}/{project_id}/logo.jpg"
+
+    def logo_thumbnail_key(self, project_id: int) -> str:
+        """S3 key for the logo thumbnail."""
+        return f"{self.logo_processed_prefix}/{project_id}/thumb.jpg"
+
+    def logo_all_keys(self, project_id: int) -> list[str]:
+        """All S3 keys related to a project's logo."""
+        return [
+            self.logo_original_key(project_id),
+            self.logo_key(project_id),
+            self.logo_thumbnail_key(project_id),
+        ]
 
     @field_validator("database_url")
     @classmethod

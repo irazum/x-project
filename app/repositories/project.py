@@ -109,25 +109,19 @@ class ProjectRepository(BaseRepository[Project]):
 
         return project
 
-    async def update_logo(
+    async def set_has_logo(
         self,
         project_id: int,
-        logo_key: str | None,
-        thumbnail_key: str | None = None,
+        has_logo: bool,
     ) -> Project | None:
         """
-        Update project logo keys.
+        Update project has_logo flag.
 
         Args:
             project_id: The project ID
-            logo_key: S3 key for the logo (or None to remove)
-            thumbnail_key: S3 key for the thumbnail (or None to remove)
+            has_logo: Whether the project has a logo
 
         Returns:
             The updated project if found
         """
-        return await self.update(
-            project_id,
-            logo_key=logo_key,
-            logo_thumbnail_key=thumbnail_key,
-        )
+        return await self.update(project_id, has_logo=has_logo)

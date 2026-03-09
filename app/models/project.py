@@ -1,6 +1,6 @@
 """Project model."""
 
-from sqlalchemy import String, Text
+from sqlalchemy import Boolean, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
@@ -15,9 +15,8 @@ class Project(Base, TimestampMixin):
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    # Logo stored in S3
-    logo_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    logo_thumbnail_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    # Logo flag — actual files use convention-based S3 paths
+    has_logo: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     # Relationships
     documents: Mapped[list["Document"]] = relationship(  # noqa: F821 (can not import Document due to circular import)

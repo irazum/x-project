@@ -346,17 +346,17 @@ class LogoService:
         if not project:
             raise NotFoundError("Project", project_id)
 
-        # Check access
         if not await self.access_repo.has_access(user_id, project_id):
             raise AuthorizationError("You don't have access to this project")
 
-        # Check if logo exists
-        logo_key = project.logo_thumbnail_key if thumbnail else project.logo_key
-        if not logo_key:
+        if not project.has_logo:
             raise NotFoundError("Logo for project", project_id)
 
-        # Download from S3
-        content, content_type = await storage_service.download_file(logo_key)
+        key = (
+            settings.logo_thumbnail_key(project_id) if thumbnail else settings.logo_key(project_id)
+        )
+
+        content, content_type = await storage_service.download_file(key)
         return content, content_type
 
     async def upsert_logo(
@@ -382,38 +382,28 @@ class LogoService:
         if not project:
             raise NotFoundError("Project", project_id)
 
-        # Check access
         if not await self.access_repo.has_access(user_id, project_id):
             raise AuthorizationError("You don't have access to this project")
 
-        # Validate image type
         allowed_types = settings.allowed_image_types_list
         if file.content_type not in allowed_types:
             raise InvalidFileTypeError(file.content_type, allowed_types)
 
-        # Delete existing logo if present
-        if project.logo_key or project.logo_thumbnail_key:
-            await storage_service.delete_files(
-                [k for k in [project.logo_key, project.logo_thumbnail_key] if k]
-            )
+        # Delete old logo files if present
+        if project.has_logo:
+            await storage_service.delete_files(settings.logo_all_keys(project_id))
 
-        # Read file content
+        # Read file content and upload original
         content = await file.read()
         file_obj = io.BytesIO(content)
 
-        # Upload and process logo
-        logo_key, thumbnail_key = await storage_service.upload_logo(
+        await storage_service.upload_logo(
             file=file_obj,
-            filename=file.filename,
             project_id=project_id,
         )
 
-        # Update database
-        await self.project_repo.update_logo(
-            project_id=project_id,
-            logo_key=logo_key,
-            thumbnail_key=thumbnail_key,
-        )
+        # Set has_logo flag
+        await self.project_repo.set_has_logo(project_id, has_logo=True)
 
     async def delete_logo(
         self,
@@ -435,19 +425,10 @@ class LogoService:
         if not project:
             raise NotFoundError("Project", project_id)
 
-        # Check access
         if not await self.access_repo.has_access(user_id, project_id):
             raise AuthorizationError("You don't have access to this project")
 
-        # Delete from S3 if exists
-        if project.logo_key or project.logo_thumbnail_key:
-            await storage_service.delete_files(
-                [k for k in [project.logo_key, project.logo_thumbnail_key] if k]
-            )
+        if project.has_logo:
+            await storage_service.delete_files(settings.logo_all_keys(project_id))
 
-        # Update database
-        await self.project_repo.update_logo(
-            project_id=project_id,
-            logo_key=None,
-            thumbnail_key=None,
-        )
+        await self.project_repo.set_has_logo(project_id, has_logo=False)
